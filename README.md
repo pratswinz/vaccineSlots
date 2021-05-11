@@ -10,7 +10,7 @@ Script will keep running at specified intervals and start making loud sound if a
 Copy content from index.html and paste in any file with html extension and just open in browser
 
 
-## How to Usage 
+## How to Use 
 
 Change the config on top of file based on below comments made besides the values
 
