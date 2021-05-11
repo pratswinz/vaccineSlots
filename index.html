@@ -17,7 +17,7 @@ body{
     <script>
         let config = {
             searchByDistrict: true,//true if want to search by district ID,false if search by pincode
-            districtId: 663,//district ID to be assigned
+            districtId: 294,//district ID to be assigned
             searchByPinCode: false,//true if want to search by pincode,false if search by district ID
             pinCode: 560100, //search area pincode
             checkTimeInterval: 10,//unit in seconds <integer>
@@ -56,6 +56,7 @@ body{
         function checkSlots() {
             let x = document.getElementById("myAudio");
             x.pause();
+            document.getElementById("demo").innerHTML = "";
             const Http = new XMLHttpRequest();
             let url;
             const baseUrl = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public`;
