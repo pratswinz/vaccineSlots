@@ -17,7 +17,7 @@ body{
     <script>
         let config = {
             searchByDistrict: true,//true if want to search by district ID,false if search by pincode
-            districtId: 294,//district ID to be assigned
+            districtId: 663,//district ID to be assigned
             searchByPinCode: false,//true if want to search by pincode,false if search by district ID
             pinCode: 560100, //search area pincode
             checkTimeInterval: 10,//unit in seconds <integer>
@@ -84,6 +84,8 @@ body{
                                         "district_name": obj.district_name,
                                         "block_name": obj.block_name,
                                         "pincode": obj.pincode,
+                                        "date":item.date,
+                                        "slots":item.slots,
                                         "available_capacity": item.available_capacity,
                                         "vaccine": item.vaccine,
                                         "dates": JSON.stringify(item.slots)
@@ -106,9 +108,10 @@ body{
                             html += "<td>" + rows[i].state_name + "</td>";
                             html += "<td>" + rows[i].district_name + "</td>";
                             html += "<td>" + rows[i].pincode + "</td>";
+                            html += "<td>" + rows[i].date + "</td>";
                             html += "<td>" + rows[i].available_capacity + "</td>";
                             html += "<td>" + rows[i].vaccine + "</td>";
-                            html += "<td>" + rows[i].dates + "</td>";
+                            html += "<td>" + rows[i].slots + "</td>";
                             html += "</tr>";
 
                         }
