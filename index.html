@@ -101,7 +101,12 @@ body{
                         let html = "<table border='1|1'>";
                         html += "<tr><th>Center ID</th><th>Hospital</th><th>Address</th><th>State</th><th>District</th><th>Pincode</th><th>Capacity</th><th>Vaccine</th><th>Dates</th></tr>";
                         for (var i = 0; i < rows.length; i++) {
-                            html += "<tr>";
+                            if(rows[i].date != getTodayDate()){
+                                html += "<tr style='background:#E5F5F1'>";
+                            }else{
+                                html += "<tr>";
+                            }
+                            
                             html += "<td>" + rows[i].center_id + "</td>";
                             html += "<td>" + rows[i].name + "</td>";
                             html += "<td>" + rows[i].address + "</td>";
