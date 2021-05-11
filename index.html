@@ -15,18 +15,16 @@ body{
 
 <head>
     <script>
-        //checkTimeInterval unit in seconds <integer>
-        //customDate format in DD-MM-YYYY in <string>
         let config = {
-            searchByDistrict: true,
-            districtId: 663,
-            searchByPinCode: false,
-            pinCode: 209302,
-            checkTimeInterval: 15,
-            minAgeLimit: 18,
+            searchByDistrict: true,//true if want to search by district ID,false if search by pincode
+            districtId: 663,//district ID to be assigned
+            searchByPinCode: false,//true if want to search by pincode,false if search by district ID
+            pinCode: 209302, //search area pincode
+            checkTimeInterval: 15,//unit in seconds <integer>
+            minAgeLimit: 18,   // 18,45 keep any of these values
             minAvailableCapacity: 1,
-            autoDatePick:true,
-            customDate:""
+            autoDatePick:true, //if want to search by todays date and future dates,false if providing any custom date
+            customDate:""//format in DD-MM-YYYY in <string>
         }
         let timerVal;
 
@@ -143,7 +141,7 @@ body{
 
 <body>
     <button onclick="startChecking()">Start checking</button>
-    <button onclick="stopChecking()">stop checking</button>
+    <button onclick="stopChecking()">Stop checking</button>
     <br/><br/>
     <div id="loadingData"></div>
     <br/>
