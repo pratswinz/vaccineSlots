@@ -29,8 +29,9 @@ customDate:"31-05-2021"//format in DD-MM-YYYY in <string>
 Please make sure to update tests as appropriate.
 
 ## Start/Stop checking slots
-```
 As soon as the page opens the script starts running.
+
+```
 To STOP - Just click on stop checking button.
 To START again - Click on start checking
 ```
