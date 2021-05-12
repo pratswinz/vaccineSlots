@@ -26,7 +26,9 @@ body{
             autoDatePick:true, //if want to search by todays date and future dates,false if providing any custom date
             customDate:""//format in DD-MM-YYYY in <string>
         }
+        
         let timerVal;
+        const Http = new XMLHttpRequest();
 
         function playAudio() {
             let x = document.getElementById("myAudio");
@@ -57,7 +59,7 @@ body{
             let x = document.getElementById("myAudio");
             x.pause();
             document.getElementById("demo").innerHTML = "";
-            const Http = new XMLHttpRequest();
+            
             let url;
             const baseUrl = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public`;
             if (config.searchByDistrict) {
