@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<style>
+    table, th, td {
+    border: 1px solid rgb(76, 134, 243);
+    border-collapse: collapse;
+}
+th, td {
+    padding: 5px;
+}
+body{
+    font-size: .8em;
+}
+</style>
+
+<head>
+    <script>
+        let config = {
+            searchByDistrict: true,//true if want to search by district ID,false if search by pincode
+            districtId: 265,//district ID to be assigned
+            searchByPinCode: false,//true if want to search by pincode,false if search by district ID
+            pinCode: 560100, //search area pincode
+            checkTimeInterval: 10,//unit in seconds <integer>
+            minAgeLimit: [18,45],   // 18,45 keep any of these values for age in years,both can also be kept
+            minAvailableCapacity: 1,
+            autoDatePick:true, //if want to search by todays date and future dates,false if providing any custom date
+            customDate:""//format in DD-MM-YYYY in <string>
+        }
+        
+        let timerVal;
+        const Http = new XMLHttpRequest();
+
+        function playAudio() {
+            let x = document.getElementById("myAudio");
+            x.play();
+        }
+
+        function getTodayDate() {
+            let today = new Date();
+            let dd = today.getDate();
+
+            let mm = today.getMonth() + 1;
+            const yyyy = today.getFullYear();
+            if (dd < 10) {
+                dd = `0${dd}`;
+            }
+
+            if (mm < 10) {
+                mm = `0${mm}`;
+            }
+            today = `${dd}-${mm}-${yyyy}`;
+            return today;
+        }
+
+        //here we are checking if auto date is enabled and also if custom date is empty then we pick the auto date value
+        let date = config.autoDatePick?getTodayDate():(!config.customDate && customDate=="")?getTodayDate():config.customDate;
+
+        function checkSlots() {
+            let x = document.getElementById("myAudio");
+            x.pause();
+            document.getElementById("demo").innerHTML = "";
+            
+            let url;
+            const baseUrl = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public`;
+            if (config.searchByDistrict) {
+                url = `${baseUrl}/calendarByDistrict?district_id=${config.districtId}&date=${date}`;
+            }
+            if (config.searchByPinCode) {
+                url = `${baseUrl}/calendarByPin?pincode=${config.pinCode}&date=${date}`;
+            }
+            Http.open("GET", url);
+            Http.send();
+
+            Http.onload = (e) => {
+                if (Http.status == 200) {
+                    let availableSlots = [];
+                    if (Http.response && Http.response != "") {
+                        let jsonData = JSON.parse(Http.response);
+                        jsonData.centers.forEach(obj => {
+                            obj.sessions.forEach(item => {
+                                if (item.available_capacity >= config.minAvailableCapacity && config.minAgeLimit.indexOf(item.min_age_limit)>-1) {
+                                    let newObj = {
+                                        "center_id": obj.center_id,
+                                        "name": obj.name,
+                                        "address": obj.address,
+                                        "state_name": obj.state_name,
+                                        "district_name": obj.district_name,
+                                        "block_name": obj.block_name,
+                                        "pincode": obj.pincode,
+                                        "date":item.date,
+                                        "slots":item.slots,
+                                        "available_capacity": item.available_capacity,
+                                        "vaccine": item.vaccine,
+                                        "age":item.min_age_limit,
+                                        "dates": JSON.stringify(item.slots),
+                                        "fee_type":obj.fee_type
+                                    };
+                                    availableSlots.push(newObj);
+                                }
+                            });
+                        });
+                    }
+                    if (availableSlots.length > 0) {
+                        playAudio();
+                        let rows = availableSlots;
+                        let html = "<table border='1|1'>";
+                        html += "<tr><th>Center ID</th><th>Hospital</th><th>Address</th><th>State</th><th>District</th><th>Pincode</th><th>Date</th><th>Capacity</th><th>Vaccine</th><th>Age</th><th>Fees</th></tr>";
+                        for (var i = 0; i < rows.length; i++) {
+                            if(rows[i].date != getTodayDate()){
+                                html += "<tr style='background:#4ae8a6'>";
+                            }else{
+                                html += "<tr style='background:#F9C882'>";
+                            }
+                            
+                            html += "<td>" + rows[i].center_id + "</td>";
+                            html += "<td>" + rows[i].name + "</td>";
+                            html += "<td>" + rows[i].address + "</td>";
+                            html += "<td>" + rows[i].state_name + "</td>";
+                            html += "<td>" + rows[i].district_name + "</td>";
+                            html += "<td>" + rows[i].pincode + "</td>";
+                            html += "<td>" + rows[i].date + "</td>";
+                            html += "<td>" + rows[i].available_capacity + "</td>";
+                            html += "<td>" + rows[i].vaccine + "</td>";
+                            html += "<td>" + rows[i].age + "</td>";
+                            html += "<td>" + rows[i].fee_type + "</td>";
+                            html += "</tr>";
+
+                        }
+                        html += "</table>";
+                        document.getElementById("demo").innerHTML = html;
+                    }
+                }
+            }
+        }
+
+        function startChecking() {
+            checkSlots();
+            timerVal = setInterval(checkSlots, 1000 * config.checkTimeInterval);
+            if (document.getElementById("loadingData")) {
+                document.getElementById("loadingData").innerHTML = "Checking availability...";
+            }
+        }
+
+        function stopChecking() {
+            let x = document.getElementById("myAudio");
+            x.pause();
+            clearInterval(timerVal);
+            if (document.getElementById("loadingData")) {
+                document.getElementById("loadingData").innerHTML = "Stopped checking...";
+            }
+        }
+    </script>
+</head>
+
+
+<body>
+    <button onclick="startChecking()">Start checking</button>
+    <button onclick="stopChecking()">Stop checking</button>
+    <br/>
+    <div style="font-size:20px">Click on start checking button</div>
+    <br/><br/>
+    <div id="loadingData"></div>
+    <br/>
+    <div id="demo"></div>
+    <audio style="visibility:hidden" id="myAudio" controls>
+        <source src="https://www.fesliyanstudios.com/soundeffects/2020-05-31-Aux/OriginalMono/Alien-Computer-Beeping-Noises-www.fesliyanstudios.com.mp3" type="audio/mpeg">
+    </audio>
+    
+</body>
+
+</html>
