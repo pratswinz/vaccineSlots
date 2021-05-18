@@ -21,12 +21,12 @@ body{
             searchByPinCode: false,//true if want to search by pincode,false if search by district ID
             pinCode: 560100, //search area pincode
             checkTimeInterval: 10,//unit in seconds <integer>
-            minAgeLimit: [18,45],   // 18,45 keep any of these values for age in years,both can also be kept
+            minAgeLimit: [18],   // 18,45 keep any of these values for age in years,both can also be kept
             minAvailableCapacity: 1,
-            autoDatePick:true, //if want to search by todays date and future dates,false if providing any custom date
-            customDate:""//format in DD-MM-YYYY in <string>
+            autoDatePick: false, //if want to search by todays date and future dates,false if providing any custom date
+            customDate: "17-05-2021"//format in DD-MM-YYYY in <string>
         }
-        
+
         let timerVal;
         const Http = new XMLHttpRequest();
 
@@ -53,13 +53,14 @@ body{
         }
 
         //here we are checking if auto date is enabled and also if custom date is empty then we pick the auto date value
-        let date = config.autoDatePick?getTodayDate():(!config.customDate && customDate=="")?getTodayDate():config.customDate;
-
+        let date = config.autoDatePick ? getTodayDate() : (!config.customDate && customDate == "") ? getTodayDate() : config.customDate;
+        let oldCenterIds = [];
         function checkSlots() {
+            let availableSlots = [];
             let x = document.getElementById("myAudio");
             x.pause();
             document.getElementById("demo").innerHTML = "";
-            
+
             let url;
             const baseUrl = `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public`;
             if (config.searchByDistrict) {
@@ -72,13 +73,13 @@ body{
             Http.send();
 
             Http.onload = (e) => {
+                let centerIds = [];
                 if (Http.status == 200) {
-                    let availableSlots = [];
                     if (Http.response && Http.response != "") {
                         let jsonData = JSON.parse(Http.response);
                         jsonData.centers.forEach(obj => {
                             obj.sessions.forEach(item => {
-                                if (item.available_capacity >= config.minAvailableCapacity && config.minAgeLimit.indexOf(item.min_age_limit)>-1) {
+                                if (item.available_capacity >= config.minAvailableCapacity && config.minAgeLimit.indexOf(item.min_age_limit) > -1 ) {//&& obj.fee_type != "Free"
                                     let newObj = {
                                         "center_id": obj.center_id,
                                         "name": obj.name,
@@ -87,34 +88,42 @@ body{
                                         "district_name": obj.district_name,
                                         "block_name": obj.block_name,
                                         "pincode": obj.pincode,
-                                        "date":item.date,
-                                        "slots":item.slots,
+                                        "date": item.date,
+                                        "slots": item.slots,
                                         "available_capacity": item.available_capacity,
                                         "vaccine": item.vaccine,
-                                        "age":item.min_age_limit,
+                                        "age": item.min_age_limit,
                                         "dates": JSON.stringify(item.slots),
-                                        "fee_type":obj.fee_type
+                                        "fee_type": obj.fee_type
                                     };
+                                    centerIds.push(obj.center_id);
                                     availableSlots.push(newObj);
                                 }
                             });
                         });
                     }
+                    
                     if (availableSlots.length > 0) {
-                        playAudio();
+                        if(JSON.stringify(oldCenterIds) != JSON.stringify(centerIds)){
+                            //added this check because sound was playing continuously even if the API is giving same results again and again
+                            //Now sound will only play if there will be any new centre available
+                            playAudio();
+                        }
+                        oldCenterIds = centerIds;
+                        
                         let rows = availableSlots;
                         let html = "<table border='1|1'>";
-                        html += "<tr><th>Center ID</th><th>Hospital</th><th>Address</th><th>State</th><th>District</th><th>Pincode</th><th>Date</th><th>Capacity</th><th>Vaccine</th><th>Age</th><th>Fees</th></tr>";
+                        html += "<tr><th>No.</th><th>Center ID</th><th>Hospital</th><th>Address</th><th>State</th><th>District</th><th>Pincode</th><th>Date</th><th>Capacity</th><th>Vaccine</th><th>Age</th><th>Fees</th></tr>";
                         for (var i = 0; i < rows.length; i++) {
-                            if(rows[i].date != getTodayDate()){
+                            if (rows[i].date != getTodayDate()) {
                                 html += "<tr style='background:#4ae8a6'>";
-                            }else{
+                            } else {
                                 html += "<tr style='background:#F9C882'>";
                             }
-                            
+                            html += "<td>" + (i + 1) + "</td>";
                             html += "<td>" + rows[i].center_id + "</td>";
                             html += "<td>" + rows[i].name + "</td>";
-                            html += "<td>" + rows[i].address + "</td>";
+                            html += "<td style='width:400px'>" + rows[i].address + "</td>";
                             html += "<td>" + rows[i].state_name + "</td>";
                             html += "<td>" + rows[i].district_name + "</td>";
                             html += "<td>" + rows[i].pincode + "</td>";
@@ -122,9 +131,12 @@ body{
                             html += "<td>" + rows[i].available_capacity + "</td>";
                             html += "<td>" + rows[i].vaccine + "</td>";
                             html += "<td>" + rows[i].age + "</td>";
-                            html += "<td>" + rows[i].fee_type + "</td>";
+                            if(rows[i].fee_type != 'Free'){
+                                html += "<td style='background:#3CA4D5'>" + rows[i].fee_type + "</td>";
+                            }else{
+                                html += "<td>" + rows[i].fee_type + "</td>";
+                            }
                             html += "</tr>";
-
                         }
                         html += "</table>";
                         document.getElementById("demo").innerHTML = html;
@@ -156,16 +168,17 @@ body{
 <body>
     <button onclick="startChecking()">Start checking</button>
     <button onclick="stopChecking()">Stop checking</button>
-    <br/>
+    <br />
     <div style="font-size:20px">Click on start checking button</div>
-    <br/><br/>
+    <br /><br />
     <div id="loadingData"></div>
-    <br/>
+    <br />
     <div id="demo"></div>
     <audio style="visibility:hidden" id="myAudio" controls>
-        <source src="https://www.fesliyanstudios.com/soundeffects/2020-05-31-Aux/OriginalMono/Alien-Computer-Beeping-Noises-www.fesliyanstudios.com.mp3" type="audio/mpeg">
+        <source src="https://www.fesliyanstudios.com/soundeffects/2020-05-31-Aux/OriginalMono/Alien-Computer-Beeping-Noises-www.fesliyanstudios.com.mp3"
+            type="audio/mpeg">
     </audio>
-    
+
 </body>
 
 </html>
