@@ -23,8 +23,8 @@ body{
             checkTimeInterval: 10,//unit in seconds <integer>
             minAgeLimit: [18],   // 18,45 keep any of these values for age in years,both can also be kept
             minAvailableCapacity: 1,
-            autoDatePick: false, //if want to search by todays date and future dates,false if providing any custom date
-            customDate: "17-05-2021"//format in DD-MM-YYYY in <string>
+            autoDatePick: true, //if want to search by todays date and future dates,false if providing any custom date
+            customDate: "23-05-2021"//format in DD-MM-YYYY in <string>
         }
 
         let timerVal;
@@ -79,7 +79,7 @@ body{
                         let jsonData = JSON.parse(Http.response);
                         jsonData.centers.forEach(obj => {
                             obj.sessions.forEach(item => {
-                                if (item.available_capacity >= config.minAvailableCapacity && config.minAgeLimit.indexOf(item.min_age_limit) > -1 ) {//&& obj.fee_type != "Free"
+                                if (item.available_capacity >= config.minAvailableCapacity && config.minAgeLimit.indexOf(item.min_age_limit) > -1) {//&& obj.fee_type != "Free"
                                     let newObj = {
                                         "center_id": obj.center_id,
                                         "name": obj.name,
@@ -102,15 +102,15 @@ body{
                             });
                         });
                     }
-                    
+
                     if (availableSlots.length > 0) {
-                        if(JSON.stringify(oldCenterIds) != JSON.stringify(centerIds)){
+                        if (JSON.stringify(oldCenterIds) != JSON.stringify(centerIds)) {
                             //added this check because sound was playing continuously even if the API is giving same results again and again
                             //Now sound will only play if there will be any new centre available
                             playAudio();
                         }
-                        oldCenterIds = centerIds;
-                        
+
+
                         let rows = availableSlots;
                         let html = "<table border='1|1'>";
                         html += "<tr><th>No.</th><th>Center ID</th><th>Hospital</th><th>Address</th><th>State</th><th>District</th><th>Pincode</th><th>Date</th><th>Capacity</th><th>Vaccine</th><th>Age</th><th>Fees</th></tr>";
@@ -121,7 +121,14 @@ body{
                                 html += "<tr style='background:#F9C882'>";
                             }
                             html += "<td>" + (i + 1) + "</td>";
-                            html += "<td>" + rows[i].center_id + "</td>";
+
+                            if (oldCenterIds.indexOf(rows[i].center_id) < -1) {
+                                html += "<td style='background:#FFFFFF'>" + rows[i].center_id + "</td>";
+                            } else {
+                                html += "<td>" + rows[i].center_id + "</td>";
+                            }
+                            
+
                             html += "<td>" + rows[i].name + "</td>";
                             html += "<td style='width:400px'>" + rows[i].address + "</td>";
                             html += "<td>" + rows[i].state_name + "</td>";
@@ -131,15 +138,16 @@ body{
                             html += "<td>" + rows[i].available_capacity + "</td>";
                             html += "<td>" + rows[i].vaccine + "</td>";
                             html += "<td>" + rows[i].age + "</td>";
-                            if(rows[i].fee_type != 'Free'){
+                            if (rows[i].fee_type != 'Free') {
                                 html += "<td style='background:#3CA4D5'>" + rows[i].fee_type + "</td>";
-                            }else{
+                            } else {
                                 html += "<td>" + rows[i].fee_type + "</td>";
                             }
                             html += "</tr>";
                         }
                         html += "</table>";
                         document.getElementById("demo").innerHTML = html;
+                        oldCenterIds = centerIds;
                     }
                 }
             }
