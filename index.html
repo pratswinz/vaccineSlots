@@ -122,7 +122,7 @@ body{
                             }
                             html += "<td>" + (i + 1) + "</td>";
 
-                            if (oldCenterIds.indexOf(rows[i].center_id) < -1) {
+                            if (oldCenterIds.indexOf(rows[i].center_id) < 0) {
                                 html += "<td style='background:#FFFFFF'>" + rows[i].center_id + "</td>";
                             } else {
                                 html += "<td>" + rows[i].center_id + "</td>";
